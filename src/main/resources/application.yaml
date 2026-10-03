@@ -1,0 +1,37 @@
+server:
+  port: 8085
+
+spring:
+  application:
+    name: plaza-audit
+  # La URI de MongoDB sale de Vault: el secreto trae MONGODB_URI. La dirección y el token de Vault llegan por
+  # VAULT_ADDR y VAULT_TOKEN.
+  config:
+    import: nova-secrets:vault:plaza/audit/mongo
+  mongodb:
+    uri: ${MONGODB_URI}
+  # Los eventos de pedidos que Debezium publica en plaza.orders (ADR-048). Sin Kafka el servicio arranca igual y
+  # responde la historia que ya guardó; los eventos nuevos llegan cuando vuelve.
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    consumer:
+      group-id: plaza-audit
+      auto-offset-reset: earliest
+    # Un span por evento, hijo del traceparent que trae el registro: la compra se ve en una sola traza.
+    listener:
+      observation-enabled: true
+
+management:
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+nova:
+  observability:
+    otlp:
+      endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:http://localhost:4318}
+
+plaza:
+  audit:
+    topic: plaza.orders
