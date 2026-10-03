@@ -19,6 +19,9 @@ dependencies {
     // Los eventos de pedidos llegan por Kafka y se guardan en MongoDB (ADR-048).
     implementation("org.springframework.boot:spring-boot-starter-kafka")
     implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
+    // Spring Boot 4.0.8 trae el driver 5.6.5, con CVE-2026-18710, CVE-2026-88032 y CVE-2026-88033; la 5.11.1 las
+    // corrige. Se quita cuando el BOM de Spring Boot traiga una igual o mayor.
+    implementation(platform("org.mongodb:mongodb-driver-bom:5.11.1"))
 
     testImplementation("org.testcontainers:testcontainers-mongodb")
     testImplementation("org.testcontainers:testcontainers-vault")
